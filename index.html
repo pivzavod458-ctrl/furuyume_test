@@ -20,30 +20,35 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%); /* Легкий градиент для эффекта стекла */
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
             background-attachment: fixed;
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 90px; /* Место для нижнего меню */
+            padding-bottom: 90px;
         }
 
         h1, h2, h3 { margin: 0; font-weight: 700; }
         p { margin: 0; color: #555; }
 
-        /* Контейнер для страниц */
+        /* ПЛАВНОЕ ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ */
         .page {
             display: none;
             padding: 20px;
-            animation: fadeIn 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
-        .page.active { display: block; }
+        .page.active {
+            display: block;
+            /* Небольшая задержка, чтобы display успел сработать */
+            animation: fadeInPage 0.4s forwards; 
+        }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes fadeInPage {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* КАРТОЧКИ ТОВАРОВ (Глассморфизм) */
+        /* КАРТОЧКИ ТОВАРОВ */
         .products-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -61,7 +66,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: transform 0.2s ease;
         }
+        .product-card:active { transform: scale(0.98); }
 
         .product-image {
             width: 100%;
@@ -74,7 +81,6 @@
             overflow: hidden;
         }
         
-        /* Заглушка для фото */
         .img-placeholder {
             width: 100%;
             height: 100%;
@@ -109,9 +115,9 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: transform 0.2s, background 0.2s;
         }
-        .add-btn:active { transform: scale(0.96); }
+        .add-btn:active { transform: scale(0.95); background: #000; }
 
         /* ПРОФИЛЬ */
         .profile-header {
@@ -146,13 +152,21 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid var(--glass-border);
+            transition: transform 0.3s;
         }
+        /* Анимация удаления */
+        .cart-item.removing {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
         .total-block {
             margin-top: 20px;
             padding: 20px;
             background: white;
             border-radius: 20px;
             text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         }
         .checkout-btn {
             background: #000;
@@ -163,9 +177,12 @@
             font-size: 16px;
             margin-top: 10px;
             border: none;
+            transition: transform 0.2s;
+            cursor: pointer;
         }
+        .checkout-btn:active { transform: scale(0.98); }
 
-        /* НИЖНЕЕ МЕНЮ (Glassmorphism) */
+        /* НИЖНЕЕ МЕНЮ */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
@@ -190,20 +207,18 @@
             text-align: center;
             font-size: 10px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
             position: relative;
         }
         .nav-item i {
             font-size: 20px;
             margin-bottom: 4px;
             display: block;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .nav-item.active {
-            color: #000;
-            transform: translateY(-2px);
-        }
+        .nav-item.active { color: #000; }
+        .nav-item.active i { transform: translateY(-4px); }
         
-        /* Badge для корзины */
         .cart-badge {
             position: absolute;
             top: -5px;
@@ -218,20 +233,34 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.2s;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .cart-badge.visible { opacity: 1; transform: scale(1); }
 
-        /* МОДАЛЬНОЕ ОКНО */
+        /* ПЛАВНОЕ МОДАЛЬНОЕ ОКНО */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
             z-index: 2000;
-            display: none;
+            
+            /* Скрыто по умолчанию */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            
+            display: flex;
             align-items: center;
             justify-content: center;
         }
+        
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .modal {
             background: white;
             width: 80%;
@@ -239,7 +268,18 @@
             border-radius: 25px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            
+            /* Анимация появления */
+            transform: scale(0.8) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
+        .modal-overlay.open .modal {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
         .modal-btn {
             background: linear-gradient(45deg, #333, #000);
             color: white;
@@ -249,14 +289,20 @@
             display: inline-block;
             margin-top: 20px;
             font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .modal-btn:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+
         .close-modal {
             margin-top: 15px;
             display: block;
             color: #999;
             font-size: 14px;
             cursor: pointer;
+            transition: color 0.2s;
         }
+        .close-modal:hover { color: #333; }
 
     </style>
 </head>
@@ -264,8 +310,7 @@
 
     <div id="home" class="page active">
         <h2 style="margin-bottom: 20px;">Каталог</h2>
-        <div class="products-grid" id="products-container">
-            </div>
+        <div class="products-grid" id="products-container"></div>
     </div>
 
     <div id="cart" class="page">
@@ -279,7 +324,7 @@
                 <span>Итого:</span>
                 <span id="total-price" style="font-weight: bold;">0 ₽</span>
             </div>
-            <button class="checkout-btn" onclick="openCheckoutModal()">Перейти к оплате</button>
+            <button class="checkout-btn" onclick="openCheckoutModal()">Оформить заказ</button>
         </div>
     </div>
 
@@ -315,23 +360,23 @@
         <div class="modal">
             <i class="fas fa-paper-plane" style="font-size: 40px; margin-bottom: 20px; color: #333;"></i>
             <h3>Оформление</h3>
-            <p style="margin-top: 10px;">Для оплаты заказа напишите менеджеру:</p>
-            <a href="https://t.me/furuyumeorders" class="modal-btn">Написать @furuyumeorders</a>
+            <p style="margin-top: 10px;">Нажмите кнопку ниже, чтобы отправить список товаров менеджеру:</p>
+            
+            <a href="#" id="order-link" target="_blank" class="modal-btn">Написать @furuyumeorders</a>
+            
             <span class="close-modal" onclick="closeCheckoutModal()">Закрыть</span>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрыть на весь экран
+        tg.expand(); 
 
-        // Данные пользователя
         const user = tg.initDataUnsafe.user;
         if (user) {
             document.getElementById('user-name').innerText = user.first_name + ' ' + (user.last_name || '');
         }
 
-        // База данных товаров
         const products = [
             { id: 1, name: "Adidas Japan track jacket", price: 7600 },
             { id: 2, name: "Adidas x Yohji Yamamoto", price: 7200 },
@@ -341,7 +386,6 @@
 
         let cart = [];
 
-        // Рендер товаров
         function renderProducts() {
             const container = document.getElementById('products-container');
             container.innerHTML = products.map(p => `
@@ -351,26 +395,33 @@
                     </div>
                     <div class="product-title">${p.name}</div>
                     <div class="product-price">${p.price} ₽</div>
-                    <button class="add-btn" onclick="addToCart(${p.id})">В корзину</button>
+                    <button class="add-btn" onclick="addToCart(${p.id}, this)">В корзину</button>
                 </div>
             `).join('');
         }
 
-        // Добавление в корзину
-        function addToCart(id) {
+        function addToCart(id, btnElement) {
             const product = products.find(p => p.id === id);
             cart.push(product);
-            updateCartUI();
             
-            // Вибрация (Haptic Feedback)
+            // Анимация кнопки при нажатии
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "Добавлено";
+            btnElement.style.background = "#000";
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.background = "";
+            }, 1000);
+
+            updateCartUI();
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        // Обновление корзины
         function updateCartUI() {
             const badge = document.getElementById('cart-badge');
             badge.innerText = cart.length;
-            badge.style.opacity = cart.length > 0 ? '1' : '0';
+            if (cart.length > 0) badge.classList.add('visible');
+            else badge.classList.remove('visible');
 
             const cartItemsContainer = document.getElementById('cart-items');
             const totalBlock = document.getElementById('cart-total-block');
@@ -385,12 +436,12 @@
                 cartItemsContainer.innerHTML = cart.map((item, index) => {
                     total += item.price;
                     return `
-                        <div class="cart-item">
+                        <div class="cart-item" id="item-${index}">
                             <div>
                                 <div style="font-weight:bold; font-size: 14px;">${item.name}</div>
                                 <div style="font-size: 12px; color: #666;">${item.price} ₽</div>
                             </div>
-                            <i class="fas fa-trash" onclick="removeFromCart(${index})" style="color: #999; cursor: pointer;"></i>
+                            <i class="fas fa-trash" onclick="removeFromCart(${index})" style="color: #999; cursor: pointer; padding: 10px;"></i>
                         </div>
                     `;
                 }).join('');
@@ -399,34 +450,57 @@
         }
 
         function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
+            const itemElement = document.getElementById(`item-${index}`);
+            itemElement.classList.add('removing');
+            
+            setTimeout(() => {
+                cart.splice(index, 1);
+                updateCartUI();
+            }, 300); // Ждем окончания анимации
         }
 
-        // Переключение вкладок
         function switchTab(tabId, element) {
-            // Скрыть все страницы
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Показать нужную
             document.getElementById(tabId).classList.add('active');
             
-            // Обновить кнопки меню
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             element.classList.add('active');
 
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
-        // Модальное окно
+        // --- ЛОГИКА ГЕНЕРАЦИИ ССЫЛКИ НА ОПЛАТУ ---
         function openCheckoutModal() {
-            document.getElementById('checkout-modal').style.display = 'flex';
+            const modalOverlay = document.getElementById('checkout-modal');
+            const orderLinkBtn = document.getElementById('order-link');
+            
+            // 1. Считаем сумму
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+            // 2. Формируем текст сообщения
+            let message = "Здравствуйте! Я хочу оформить заказ:\n\n";
+            cart.forEach((item, index) => {
+                message += `${index + 1}. ${item.name} — ${item.price} руб.\n`;
+            });
+            message += `\n💰 Итого: ${total} руб.`;
+
+            // 3. Кодируем текст для URL (чтобы спецсимволы и пробелы работали)
+            const encodedMessage = encodeURIComponent(message);
+            
+            // 4. Вставляем в ссылку
+            // Формат: https://t.me/USERNAME?text=MESSAGE
+            orderLinkBtn.href = `https://t.me/furuyumeorders?text=${encodedMessage}`;
+
+            // 5. Показываем окно (добавляем класс open для анимации)
+            modalOverlay.classList.add('open');
+            
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
         function closeCheckoutModal() {
-            document.getElementById('checkout-modal').style.display = 'none';
+            document.getElementById('checkout-modal').classList.remove('open');
         }
 
-        // Запуск
         renderProducts();
 
     </script>
