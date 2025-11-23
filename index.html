@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Магазин</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f2f4f6;
+            --text-color: #1a1a1a;
+            --accent-color: #333333;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%); /* Легкий градиент для эффекта стекла */
+            background-attachment: fixed;
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 90px; /* Место для нижнего меню */
+        }
+
+        h1, h2, h3 { margin: 0; font-weight: 700; }
+        p { margin: 0; color: #555; }
+
+        /* Контейнер для страниц */
+        .page {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* КАРТОЧКИ ТОВАРОВ (Глассморфизм) */
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .product-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background-color: #ddd;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            object-fit: cover;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Заглушка для фото */
+        .img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0e0e0;
+            color: #888;
+            font-size: 24px;
+        }
+
+        .product-title {
+            font-size: 13px;
+            line-height: 1.2;
+            margin-bottom: 5px;
+            flex-grow: 1;
+        }
+
+        .product-price {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 10px 0;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .add-btn:active { transform: scale(0.96); }
+
+        /* ПРОФИЛЬ */
+        .profile-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #333;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+        }
+
+        /* КОРЗИНА */
+        .cart-item {
+            background: var(--glass-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+        }
+        .total-block {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .checkout-btn {
+            background: #000;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: none;
+        }
+
+        /* НИЖНЕЕ МЕНЮ (Glassmorphism) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 25px;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            color: #999;
+            text-align: center;
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .nav-item.active {
+            color: #000;
+            transform: translateY(-2px);
+        }
+        
+        /* Badge для корзины */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #000;
+            color: #fff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* МОДАЛЬНОЕ ОКНО */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            background: white;
+            width: 80%;
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        .modal-btn {
+            background: linear-gradient(45deg, #333, #000);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .close-modal {
+            margin-top: 15px;
+            display: block;
+            color: #999;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="home" class="page active">
+        <h2 style="margin-bottom: 20px;">Каталог</h2>
+        <div class="products-grid" id="products-container">
+            </div>
+    </div>
+
+    <div id="cart" class="page">
+        <h2 style="margin-bottom: 20px;">Корзина</h2>
+        <div id="cart-items">
+            <p style="text-align: center; margin-top: 50px; opacity: 0.5;">Ваша корзина пуста</p>
+        </div>
+        
+        <div id="cart-total-block" class="total-block" style="display: none;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Итого:</span>
+                <span id="total-price" style="font-weight: bold;">0 ₽</span>
+            </div>
+            <button class="checkout-btn" onclick="openCheckoutModal()">Перейти к оплате</button>
+        </div>
+    </div>
+
+    <div id="profile" class="page">
+        <div class="profile-header">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <h3 id="user-name">Guest User</h3>
+            <p>Добро пожаловать в магазин</p>
+        </div>
+        <div style="background: var(--glass-bg); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
+            <h3>Мои заказы</h3>
+            <p style="margin-top: 10px; font-size: 14px;">История заказов пуста.</p>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('cart', this)">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Корзина</span>
+            <div class="cart-badge" id="cart-badge">0</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="modal">
+            <i class="fas fa-paper-plane" style="font-size: 40px; margin-bottom: 20px; color: #333;"></i>
+            <h3>Оформление</h3>
+            <p style="margin-top: 10px;">Для оплаты заказа напишите менеджеру:</p>
+            <a href="https://t.me/furuyumeorders" class="modal-btn">Написать @furuyumeorders</a>
+            <span class="close-modal" onclick="closeCheckoutModal()">Закрыть</span>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрыть на весь экран
+
+        // Данные пользователя
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('user-name').innerText = user.first_name + ' ' + (user.last_name || '');
+        }
+
+        // База данных товаров
+        const products = [
+            { id: 1, name: "Adidas Japan track jacket", price: 7600 },
+            { id: 2, name: "Adidas x Yohji Yamamoto", price: 7200 },
+            { id: 3, name: "Adidas Chinese jacket", price: 5700 },
+            { id: 4, name: "VETEMENTS maroon bomber", price: 13200 }
+        ];
+
+        let cart = [];
+
+        // Рендер товаров
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="img-placeholder"><i class="fas fa-tshirt"></i></div>
+                    </div>
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">${p.price} ₽</div>
+                    <button class="add-btn" onclick="addToCart(${p.id})">В корзину</button>
+                </div>
+            `).join('');
+        }
+
+        // Добавление в корзину
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartUI();
+            
+            // Вибрация (Haptic Feedback)
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Обновление корзины
+        function updateCartUI() {
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = cart.length;
+            badge.style.opacity = cart.length > 0 ? '1' : '0';
+
+            const cartItemsContainer = document.getElementById('cart-items');
+            const totalBlock = document.getElementById('cart-total-block');
+            const totalPriceEl = document.getElementById('total-price');
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; opacity: 0.5;">Ваша корзина пуста</p>';
+                totalBlock.style.display = 'none';
+            } else {
+                totalBlock.style.display = 'block';
+                let total = 0;
+                cartItemsContainer.innerHTML = cart.map((item, index) => {
+                    total += item.price;
+                    return `
+                        <div class="cart-item">
+                            <div>
+                                <div style="font-weight:bold; font-size: 14px;">${item.name}</div>
+                                <div style="font-size: 12px; color: #666;">${item.price} ₽</div>
+                            </div>
+                            <i class="fas fa-trash" onclick="removeFromCart(${index})" style="color: #999; cursor: pointer;"></i>
+                        </div>
+                    `;
+                }).join('');
+                totalPriceEl.innerText = total + ' ₽';
+            }
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        // Переключение вкладок
+        function switchTab(tabId, element) {
+            // Скрыть все страницы
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // Показать нужную
+            document.getElementById(tabId).classList.add('active');
+            
+            // Обновить кнопки меню
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            element.classList.add('active');
+
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        // Модальное окно
+        function openCheckoutModal() {
+            document.getElementById('checkout-modal').style.display = 'flex';
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').style.display = 'none';
+        }
+
+        // Запуск
+        renderProducts();
+
+    </script>
+</body>
+</html>
