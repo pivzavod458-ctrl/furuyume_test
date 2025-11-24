@@ -13,12 +13,13 @@
 
     <style>
         :root {
-            --bg-color: #f2f4f6;
+            /* НОВЫЙ СЕРЫЙ ФОН */
+            --bg-gradient: linear-gradient(135deg, #f6f7f9 0%, #e3e6eb 100%);
             --text-color: #1a1a1a;
             --secondary-text: #8e8e93;
             --glass-bg: rgba(255, 255, 255, 0.85);
             --glass-border: rgba(255, 255, 255, 0.6);
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         }
 
         * {
@@ -30,7 +31,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            background: var(--bg-gradient);
             background-attachment: fixed;
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
@@ -40,7 +41,7 @@
         h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.5px; }
         p { margin: 0; color: var(--secondary-text); }
 
-        /* --- СЛАЙДЕР --- */
+        /* --- СЛАЙДЕР (ИСПРАВЛЕНО ВЫРАВНИВАНИЕ) --- */
         .slider-container {
             width: 100%;
             height: 180px;
@@ -69,28 +70,40 @@
             scroll-snap-align: center;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* Центрирование по вертикали */
+            align-items: center;     /* Центрирование по горизонтали */
             padding: 25px;
             position: relative;
             background: var(--glass-bg);
             backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px);
+            text-align: center;
+        }
+
+        /* Контейнер для контента слайда чтобы всё было ровно */
+        .slide-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .slide h3 { font-size: 20px; margin-bottom: 8px; color: #000; }
-        .slide p { font-size: 14px; line-height: 1.4; color: #444; margin-bottom: 15px; }
+        .slide p { font-size: 14px; line-height: 1.4; color: #444; margin-bottom: 0; }
+        
+        /* Отступ если есть кнопка */
+        .slide-content.has-btn p { margin-bottom: 15px; }
 
         .slider-btn {
             display: inline-block;
             background: #000;
             color: #fff;
-            padding: 10px 20px;
+            padding: 10px 24px;
             border-radius: 20px;
             text-decoration: none;
             font-size: 13px;
             font-weight: 600;
-            align-self: flex-start;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         /* --- СТРАНИЦЫ --- */
@@ -134,15 +147,15 @@
             border-radius: 16px;
             margin-bottom: 12px;
             overflow: hidden;
-            background: #f0f0f0; /* Цвет фона пока грузится картинка */
+            background: #e5e5e5;
             position: relative;
+            cursor: pointer; /* Показывает что можно нажать */
         }
         
-        /* Стили для картинки внутри карточки */
         .product-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Чтобы картинка заполняла квадрат красиво */
+            object-fit: cover;
             display: block;
         }
 
@@ -194,7 +207,6 @@
             overflow: hidden;
         }
 
-        /* Мини-фото в корзине */
         .cart-item-img {
             width: 40px;
             height: 40px;
@@ -339,12 +351,13 @@
             font-size: 32px;
         }
 
-        /* --- МОДАЛКА --- */
+        /* --- МОДАЛЬНЫЕ ОКНА (ОБЩИЕ СТИЛИ) --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
@@ -356,15 +369,16 @@
         .modal-overlay.open { opacity: 1; visibility: visible; }
 
         .modal {
-            background: rgba(255,255,255,0.98);
+            background: rgba(255,255,255,0.95);
             width: 85%;
-            padding: 35px 25px;
+            padding: 30px 25px;
             border-radius: 30px;
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.25);
             transform: scale(0.9) translateY(20px);
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
         }
         .modal-overlay.open .modal { transform: scale(1) translateY(0); opacity: 1; }
 
@@ -379,7 +393,11 @@
             font-weight: 600;
             font-size: 15px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            border: none;
+            cursor: pointer;
         }
+        
         .close-modal {
             margin-top: 20px;
             display: block;
@@ -396,19 +414,23 @@
         <div class="slider-container">
             <div class="slider-wrapper" id="slider">
                 <div class="slide">
-                    <h3>Сезонные скидки</h3>
-                    <p>Скидки до 30% на новую коллекцию Adidas.</p>
+                    <div class="slide-content">
+                        <h3>Сезонные скидки</h3>
+                        <p>Скидки до 30% на новую коллекцию Adidas.</p>
+                    </div>
                 </div>
                 <div class="slide">
-                    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="slide-content has-btn">
                         <h3>Конкурс на 50 000₽</h3>
                         <p>Участвуй в розыгрыше призов в нашей группе ВК!</p>
                         <a href="https://vk.com/wall-233057761_3" target="_blank" class="slider-btn">Участвовать</a>
                     </div>
                 </div>
                 <div class="slide">
-                    <h3>Быстрая отправка</h3>
-                    <p>Отправляем заказы в течение 3 дней после оформления.</p>
+                    <div class="slide-content">
+                        <h3>Быстрая отправка</h3>
+                        <p>Отправляем заказы в течение 3 дней после оформления.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -469,7 +491,18 @@
             <h3>Готово к заказу</h3>
             <p style="margin-top: 10px; font-size: 15px;">Отправьте список товаров менеджеру, чтобы завершить покупку.</p>
             <a href="#" id="order-link" target="_blank" class="modal-btn">Написать @furuyumeorders</a>
-            <span class="close-modal" onclick="closeCheckoutModal()">Вернуться назад</span>
+            <span class="close-modal" onclick="closeModal('checkout-modal')">Вернуться назад</span>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="product-info-modal">
+        <div class="modal">
+            <h3 id="info-modal-title" style="margin-bottom: 15px;">Товар</h3>
+            <p style="font-size: 15px; color: #444; line-height: 1.5;">
+                Подробную информацию о товаре вы можете уточнить напрямую у менеджера.
+            </p>
+            <a href="https://vk.com/furuyume" target="_blank" class="modal-btn" style="background: #0077FF;">Посмотреть отзывы</a>
+            <span class="close-modal" onclick="closeModal('product-info-modal')">Закрыть</span>
         </div>
     </div>
 
@@ -485,7 +518,6 @@
             document.getElementById('user-name').innerText = user.first_name + ' ' + (user.last_name || '');
         }
 
-        // ТЕПЕРЬ С КАРТИНКАМИ
         const products = [
             { id: 1, name: "Adidas Japan track jacket", price: 7600, image: "japan.jpg" },
             { id: 2, name: "Adidas x Yohji Yamamoto", price: 7200, image: "yamamoto.jpg" },
@@ -495,11 +527,12 @@
 
         let cart = [];
 
+        // --- РЕНДЕР ТОВАРОВ ---
         function renderProducts() {
             const container = document.getElementById('products-container');
             container.innerHTML = products.map(p => `
                 <div class="product-card">
-                    <div class="product-image">
+                    <div class="product-image" onclick="openProductInfo('${p.name}')">
                         <img src="${p.image}" alt="${p.name}">
                     </div>
                     <div class="product-title">${p.name}</div>
@@ -527,6 +560,31 @@
         }
 
         window.isRemoving = false;
+        let currentDisplayedTotal = 0; // Для плавной анимации цены
+
+        // --- АНИМАЦИЯ ЦЕНЫ (COUNTER) ---
+        function animatePriceChange(start, end, element) {
+            const duration = 500;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Функция плавности (easeOutQuad)
+                const ease = 1 - (1 - progress) * (1 - progress);
+                
+                const current = Math.floor(start + (end - start) * ease);
+                element.innerText = current + ' ₽';
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    currentDisplayedTotal = end; // Фиксируем конец
+                }
+            }
+            requestAnimationFrame(update);
+        }
 
         function updateCartUI() {
             const badge = document.getElementById('cart-badge');
@@ -538,6 +596,9 @@
             const totalBlock = document.getElementById('cart-total-block');
             const totalPriceEl = document.getElementById('total-price');
 
+            // Считаем новую сумму
+            const newTotal = cart.reduce((sum, item) => sum + item.price, 0);
+
             if (cart.length === 0) {
                 totalBlock.classList.add('hidden');
                 if (!window.isRemoving) {
@@ -547,12 +608,15 @@
                             <p>Ваша корзина пуста</p>
                         </div>`;
                 }
+                currentDisplayedTotal = 0; // Сброс счетчика
             } else {
                 totalBlock.classList.remove('hidden');
-                let total = 0;
                 
+                // Запускаем анимацию цены от старой к новой
+                animatePriceChange(currentDisplayedTotal, newTotal, totalPriceEl);
+                currentDisplayedTotal = newTotal;
+
                 const currentHTML = cart.map((item, index) => {
-                    total += item.price;
                     return `
                         <div class="cart-item" id="cart-item-${item.cartId}">
                             <div style="display:flex; align-items:center;">
@@ -572,7 +636,6 @@
                 if (!window.isRemoving) {
                     cartItemsContainer.innerHTML = currentHTML;
                 }
-                totalPriceEl.innerText = total + ' ₽';
             }
         }
 
@@ -599,6 +662,15 @@
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
+        // --- ЛОГИКА МОДАЛЬНЫХ ОКОН ---
+        
+        // Открытие информации о товаре
+        function openProductInfo(productName) {
+            document.getElementById('info-modal-title').innerText = productName;
+            document.getElementById('product-info-modal').classList.add('open');
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
         function openCheckoutModal() {
             const modalOverlay = document.getElementById('checkout-modal');
             const orderLinkBtn = document.getElementById('order-link');
@@ -615,10 +687,12 @@
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
-        function closeCheckoutModal() {
-            document.getElementById('checkout-modal').classList.remove('open');
+        // Общая функция закрытия
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('open');
         }
 
+        // Слайдер
         const slider = document.getElementById('slider');
         let slideIndex = 0;
         const slideCount = 3;
