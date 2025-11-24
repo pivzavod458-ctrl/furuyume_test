@@ -6,79 +6,135 @@
     <title>Магазин</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --bg-color: #f2f4f6;
             --text-color: #1a1a1a;
-            --accent-color: #333333;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --secondary-text: #8e8e93; /* Цвет как в iOS */
+            --accent-color: #000000;
+            --glass-bg: rgba(255, 255, 255, 0.70);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent; /* Убирает синее выделение при клике на Android/iOS */
+            box-sizing: border-box;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            /* Шрифт как на iPhone */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             background-attachment: fixed;
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 90px;
+            padding-bottom: 95px; /* Отступ под меню */
         }
 
-        h1, h2, h3 { margin: 0; font-weight: 700; }
-        p { margin: 0; color: #555; }
+        h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.5px; }
+        p { margin: 0; color: var(--secondary-text); }
 
-        /* ПЛАВНОЕ ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ */
+        /* --- СЛАЙДЕР (БАННЕРЫ) --- */
+        .slider-container {
+            width: 100%;
+            height: 160px;
+            overflow: hidden;
+            border-radius: 24px;
+            margin-bottom: 25px;
+            position: relative;
+            box-shadow: var(--shadow);
+            transform: translateZ(0); /* Включаем GPU */
+        }
+
+        .slider-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Firefox */
+            scroll-behavior: smooth;
+        }
+        .slider-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .slide {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 25px;
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .slide h3 { font-size: 20px; margin-bottom: 8px; color: #000; }
+        .slide p { font-size: 14px; line-height: 1.4; color: #444; }
+        
+        .slide-icon {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            font-size: 50px;
+            opacity: 0.1;
+            color: #000;
+        }
+
+        /* --- СТРАНИЦЫ --- */
         .page {
             display: none;
             padding: 20px;
             opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: scale(0.98);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: opacity, transform;
         }
         .page.active {
             display: block;
-            /* Небольшая задержка, чтобы display успел сработать */
-            animation: fadeInPage 0.4s forwards; 
+            opacity: 1;
+            transform: scale(1);
         }
 
-        @keyframes fadeInPage {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* КАРТОЧКИ ТОВАРОВ */
+        /* --- ТОВАРЫ --- */
         .products-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
         }
 
         .product-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 10px;
+            padding: 12px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s ease;
+            transition: transform 0.1s;
         }
-        .product-card:active { transform: scale(0.98); }
+        .product-card:active { transform: scale(0.96); }
 
         .product-image {
             width: 100%;
             aspect-ratio: 1/1;
-            background-color: #ddd;
-            border-radius: 15px;
-            margin-bottom: 10px;
-            object-fit: cover;
-            position: relative;
+            border-radius: 16px;
+            margin-bottom: 12px;
             overflow: hidden;
+            position: relative;
+            background: #f0f0f0;
         }
         
         .img-placeholder {
@@ -87,44 +143,165 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #e0e0e0;
-            color: #888;
-            font-size: 24px;
+            color: #a0a0a0 !important; /* Фикс фиолетового цвета на iOS */
+            font-size: 28px;
         }
 
         .product-title {
             font-size: 13px;
-            line-height: 1.2;
-            margin-bottom: 5px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 6px;
             flex-grow: 1;
+            color: #000;
         }
 
         .product-price {
             font-size: 15px;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #000;
         }
 
         .add-btn {
             width: 100%;
-            padding: 10px 0;
-            background: var(--accent-color);
+            padding: 12px 0;
+            background: #1a1a1a;
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 12px;
+            border-radius: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            transition: background 0.2s;
         }
-        .add-btn:active { transform: scale(0.95); background: #000; }
 
-        /* ПРОФИЛЬ */
+        /* --- КОРЗИНА (ОПТИМИЗИРОВАННАЯ) --- */
+        .cart-item {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+            
+            /* Свойства для анимации */
+            opacity: 1;
+            max-height: 100px;
+            transform: translateX(0);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow: hidden;
+        }
+
+        /* Класс для анимации удаления */
+        .cart-item.removing {
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border: none;
+            transform: translateX(-20px);
+        }
+
+        .total-block {
+            margin-top: 25px;
+            padding: 24px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .checkout-btn {
+            background: #000;
+            color: white;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+        }
+        .checkout-btn:active { opacity: 0.8; }
+
+        /* --- НИЖНЕЕ МЕНЮ --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            color: #b0b0b0;
+            text-align: center;
+            font-size: 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+        }
+        
+        /* Исправление фиолетовых иконок */
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+            display: block;
+            color: inherit !important; 
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .nav-item.active { color: #000; }
+        .nav-item.active i { transform: translateY(-3px) scale(1.1); color: #000 !important; }
+        
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: 12px;
+            background: #ff3b30; /* Цвет уведомлений iOS */
+            color: #fff;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid white;
+        }
+        .cart-badge.visible { opacity: 1; transform: scale(1); }
+
+        /* --- ПРОФИЛЬ --- */
         .profile-header {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 20px;
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px 20px;
             text-align: center;
             border: 1px solid var(--glass-border);
             margin-bottom: 20px;
@@ -132,197 +309,112 @@
         .avatar {
             width: 80px;
             height: 80px;
-            background: #333;
+            background: #1a1a1a;
             border-radius: 50%;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 30px;
+            font-size: 32px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
-        /* КОРЗИНА */
-        .cart-item {
-            background: var(--glass-bg);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--glass-border);
-            transition: transform 0.3s;
-        }
-        /* Анимация удаления */
-        .cart-item.removing {
-            transform: translateX(-100%);
-            opacity: 0;
-        }
-
-        .total-block {
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        }
-        .checkout-btn {
-            background: #000;
-            color: white;
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 16px;
-            margin-top: 10px;
-            border: none;
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-        .checkout-btn:active { transform: scale(0.98); }
-
-        /* НИЖНЕЕ МЕНЮ */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 25px;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            color: #999;
-            text-align: center;
-            font-size: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 4px;
-            display: block;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .nav-item.active { color: #000; }
-        .nav-item.active i { transform: translateY(-4px); }
-        
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #000;
-            color: #fff;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .cart-badge.visible { opacity: 1; transform: scale(1); }
-
-        /* ПЛАВНОЕ МОДАЛЬНОЕ ОКНО */
+        /* --- МОДАЛКА --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 2000;
-            
-            /* Скрыто по умолчанию */
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
-            
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        .modal-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
 
         .modal {
-            background: white;
-            width: 80%;
-            padding: 30px;
-            border-radius: 25px;
+            background: rgba(255,255,255,0.95);
+            width: 85%;
+            padding: 35px 25px;
+            border-radius: 30px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            
-            /* Анимация появления */
-            transform: scale(0.8) translateY(20px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            transform: scale(0.9) translateY(20px);
             opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .modal-overlay.open .modal {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
+        .modal-overlay.open .modal { transform: scale(1) translateY(0); opacity: 1; }
 
         .modal-btn {
-            background: linear-gradient(45deg, #333, #000);
+            background: #000;
             color: white;
-            padding: 12px 30px;
+            padding: 14px 30px;
             border-radius: 30px;
             text-decoration: none;
             display: inline-block;
-            margin-top: 20px;
-            font-weight: bold;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 25px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
-        .modal-btn:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
-
         .close-modal {
-            margin-top: 15px;
+            margin-top: 20px;
             display: block;
-            color: #999;
+            color: #8e8e93;
             font-size: 14px;
             cursor: pointer;
-            transition: color 0.2s;
         }
-        .close-modal:hover { color: #333; }
 
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <h2 style="margin-bottom: 20px;">Каталог</h2>
+        
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider">
+                <div class="slide">
+                    <h3>Сезонные скидки</h3>
+                    <p>Скидки до 30% на новую коллекцию Adidas.</p>
+                    <i class="fas fa-tag slide-icon"></i>
+                </div>
+                <div class="slide">
+                    <h3>Конкурс на 50 000₽</h3>
+                    <p>Участвуй в розыгрыше призов в нашей группе ВК!</p>
+                    <i class="fab fa-vk slide-icon"></i>
+                </div>
+                <div class="slide">
+                    <h3>Быстрая отправка</h3>
+                    <p>Отправляем заказы в течение 3 дней после оформления.</p>
+                    <i class="fas fa-shipping-fast slide-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 15px; padding-left: 5px;">Каталог</h2>
         <div class="products-grid" id="products-container"></div>
     </div>
 
     <div id="cart" class="page">
         <h2 style="margin-bottom: 20px;">Корзина</h2>
         <div id="cart-items">
-            <p style="text-align: center; margin-top: 50px; opacity: 0.5;">Ваша корзина пуста</p>
+            <div style="text-align: center; margin-top: 60px; color: #8e8e93;">
+                <i class="fas fa-shopping-basket" style="font-size: 40px; margin-bottom: 15px; opacity: 0.3;"></i>
+                <p>Ваша корзина пуста</p>
+            </div>
         </div>
         
         <div id="cart-total-block" class="total-block" style="display: none;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 18px;">
                 <span>Итого:</span>
-                <span id="total-price" style="font-weight: bold;">0 ₽</span>
+                <span id="total-price" style="font-weight: 700;">0 ₽</span>
             </div>
             <button class="checkout-btn" onclick="openCheckoutModal()">Оформить заказ</button>
         </div>
@@ -331,12 +423,12 @@
     <div id="profile" class="page">
         <div class="profile-header">
             <div class="avatar"><i class="fas fa-user"></i></div>
-            <h3 id="user-name">Guest User</h3>
-            <p>Добро пожаловать в магазин</p>
+            <h3 id="user-name" style="margin-bottom: 5px;">Guest User</h3>
+            <p style="font-size: 13px;">Добро пожаловать</p>
         </div>
-        <div style="background: var(--glass-bg); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border);">
-            <h3>Мои заказы</h3>
-            <p style="margin-top: 10px; font-size: 14px;">История заказов пуста.</p>
+        <div style="background: var(--glass-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--glass-border);">
+            <h3 style="margin-bottom: 10px;">История заказов</h3>
+            <p style="font-size: 14px; opacity: 0.6;">У вас пока нет активных заказов.</p>
         </div>
     </div>
 
@@ -358,19 +450,21 @@
 
     <div class="modal-overlay" id="checkout-modal">
         <div class="modal">
-            <i class="fas fa-paper-plane" style="font-size: 40px; margin-bottom: 20px; color: #333;"></i>
-            <h3>Оформление</h3>
-            <p style="margin-top: 10px;">Нажмите кнопку ниже, чтобы отправить список товаров менеджеру:</p>
-            
+            <i class="fas fa-check-circle" style="font-size: 50px; margin-bottom: 20px; color: #1a1a1a;"></i>
+            <h3>Готово к заказу</h3>
+            <p style="margin-top: 10px; font-size: 15px;">Отправьте список товаров менеджеру, чтобы завершить покупку.</p>
             <a href="#" id="order-link" target="_blank" class="modal-btn">Написать @furuyumeorders</a>
-            
-            <span class="close-modal" onclick="closeCheckoutModal()">Закрыть</span>
+            <span class="close-modal" onclick="closeCheckoutModal()">Вернуться назад</span>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand(); 
+        
+        // Настройка цветов темы Telegram
+        tg.setHeaderColor('secondary_bg_color'); 
+        tg.setBackgroundColor('secondary_bg_color');
 
         const user = tg.initDataUnsafe.user;
         if (user) {
@@ -402,16 +496,17 @@
 
         function addToCart(id, btnElement) {
             const product = products.find(p => p.id === id);
-            cart.push(product);
+            // Создаем копию объекта с уникальным ID для корзины, чтобы можно было удалять одинаковые товары по отдельности
+            const cartItem = { ...product, cartId: Date.now() + Math.random() };
+            cart.push(cartItem);
             
-            // Анимация кнопки при нажатии
             const originalText = btnElement.innerText;
             btnElement.innerText = "Добавлено";
-            btnElement.style.background = "#000";
+            btnElement.style.background = "#333";
             setTimeout(() => {
                 btnElement.innerText = originalText;
                 btnElement.style.background = "";
-            }, 1000);
+            }, 800);
 
             updateCartUI();
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
@@ -427,36 +522,75 @@
             const totalBlock = document.getElementById('cart-total-block');
             const totalPriceEl = document.getElementById('total-price');
 
+            // Если корзина пуста и мы не в процессе удаления последнего элемента
             if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; opacity: 0.5;">Ваша корзина пуста</p>';
+                cartItemsContainer.innerHTML = `
+                    <div style="text-align: center; margin-top: 60px; color: #8e8e93;">
+                        <i class="fas fa-shopping-basket" style="font-size: 40px; margin-bottom: 15px; opacity: 0.3;"></i>
+                        <p>Ваша корзина пуста</p>
+                    </div>`;
                 totalBlock.style.display = 'none';
             } else {
                 totalBlock.style.display = 'block';
                 let total = 0;
-                cartItemsContainer.innerHTML = cart.map((item, index) => {
+                
+                // Перерисовываем корзину ТОЛЬКО если количество элементов изменилось (при добавлении),
+                // но при удалении мы управляем DOM вручную, чтобы сохранить анимацию.
+                // Для простоты здесь полная перерисовка, но с хитростью для удаления.
+                
+                // Чтобы не сбивать анимацию удаления, проверим, не происходит ли удаление сейчас.
+                // В простой реализации мы просто перерендерим всё.
+                
+                const currentHTML = cart.map((item, index) => {
                     total += item.price;
                     return `
-                        <div class="cart-item" id="item-${index}">
+                        <div class="cart-item" id="cart-item-${item.cartId}">
                             <div>
-                                <div style="font-weight:bold; font-size: 14px;">${item.name}</div>
-                                <div style="font-size: 12px; color: #666;">${item.price} ₽</div>
+                                <div style="font-weight:600; font-size: 14px; margin-bottom: 4px;">${item.name}</div>
+                                <div style="font-size: 13px; color: #666;">${item.price} ₽</div>
                             </div>
-                            <i class="fas fa-trash" onclick="removeFromCart(${index})" style="color: #999; cursor: pointer; padding: 10px;"></i>
+                            <div onclick="removeFromCart('${item.cartId}')" style="padding: 10px; cursor: pointer;">
+                                <i class="fas fa-times" style="color: #ccc;"></i>
+                            </div>
                         </div>
                     `;
                 }).join('');
+                
+                // Если мы просто обновляем цифры (не удаляем), можно обновить HTML
+                // Но проще: если длина массива совпадает с кол-вом элементов в DOM, не трогаем HTML (кроме цифр).
+                // Для надежности обновляем HTML всегда, кроме момента анимации удаления.
+                
+                if (!window.isRemoving) {
+                    cartItemsContainer.innerHTML = currentHTML;
+                }
+                
                 totalPriceEl.innerText = total + ' ₽';
             }
         }
 
-        function removeFromCart(index) {
-            const itemElement = document.getElementById(`item-${index}`);
-            itemElement.classList.add('removing');
+        // Флаг, чтобы updateCartUI не перерисовал список пока идет анимация
+        window.isRemoving = false;
+
+        function removeFromCart(cartId) {
+            window.isRemoving = true;
+            const itemElement = document.getElementById(`cart-item-${cartId}`);
             
-            setTimeout(() => {
-                cart.splice(index, 1);
-                updateCartUI();
-            }, 300); // Ждем окончания анимации
+            if (itemElement) {
+                // Запускаем CSS анимацию
+                itemElement.classList.add('removing');
+                
+                // Ждем окончания анимации (400ms как в CSS)
+                setTimeout(() => {
+                    // Находим индекс элемента в массиве
+                    const index = cart.findIndex(item => item.cartId == cartId);
+                    if (index > -1) {
+                        cart.splice(index, 1);
+                    }
+                    window.isRemoving = false; // Снимаем флаг
+                    updateCartUI(); // Теперь безопасно обновляем интерфейс
+                }, 400);
+            }
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
         function switchTab(tabId, element) {
@@ -469,29 +603,19 @@
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
-        // --- ЛОГИКА ГЕНЕРАЦИИ ССЫЛКИ НА ОПЛАТУ ---
         function openCheckoutModal() {
             const modalOverlay = document.getElementById('checkout-modal');
             const orderLinkBtn = document.getElementById('order-link');
             
-            // 1. Считаем сумму
             const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-            // 2. Формируем текст сообщения
-            let message = "Здравствуйте! Я хочу оформить заказ:\n\n";
+            let message = "Здравствуйте! Хочу оформить заказ:\n\n";
             cart.forEach((item, index) => {
-                message += `${index + 1}. ${item.name} — ${item.price} руб.\n`;
+                message += `${index + 1}. ${item.name} — ${item.price} ₽\n`;
             });
-            message += `\n💰 Итого: ${total} руб.`;
+            message += `\n💰 Итого: ${total} ₽`;
 
-            // 3. Кодируем текст для URL (чтобы спецсимволы и пробелы работали)
-            const encodedMessage = encodeURIComponent(message);
-            
-            // 4. Вставляем в ссылку
-            // Формат: https://t.me/USERNAME?text=MESSAGE
-            orderLinkBtn.href = `https://t.me/furuyumeorders?text=${encodedMessage}`;
-
-            // 5. Показываем окно (добавляем класс open для анимации)
+            orderLinkBtn.href = `https://t.me/furuyumeorders?text=${encodeURIComponent(message)}`;
             modalOverlay.classList.add('open');
             
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -500,6 +624,25 @@
         function closeCheckoutModal() {
             document.getElementById('checkout-modal').classList.remove('open');
         }
+
+        // --- ЛОГИКА СЛАЙДЕРА ---
+        const slider = document.getElementById('slider');
+        let slideIndex = 0;
+        const slideCount = 3;
+        const slideWidth = slider.clientWidth;
+
+        // Автоматическая прокрутка
+        setInterval(() => {
+            slideIndex++;
+            if (slideIndex >= slideCount) {
+                slideIndex = 0;
+                slider.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                // Скроллим на ширину одного слайда * индекс
+                // (Примитивный скролл, для exact fit лучше использовать offsetLeft)
+                slider.scrollTo({ left: slider.offsetWidth * slideIndex, behavior: 'smooth' });
+            }
+        }, 5000); // Каждые 5 секунд
 
         renderProducts();
 
