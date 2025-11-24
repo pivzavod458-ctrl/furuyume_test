@@ -15,43 +15,44 @@
         :root {
             --bg-color: #f2f4f6;
             --text-color: #1a1a1a;
-            --secondary-text: #8e8e93; /* Цвет как в iOS */
-            --accent-color: #000000;
-            --glass-bg: rgba(255, 255, 255, 0.70);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+            --secondary-text: #8e8e93;
+            --glass-bg: rgba(255, 255, 255, 0.85); /* Чуть менее прозрачно, чтобы убрать баги */
+            --glass-border: rgba(255, 255, 255, 0.6);
+            /* Упрощенная тень, чтобы не баговала на iOS */
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         * {
-            -webkit-tap-highlight-color: transparent; /* Убирает синее выделение при клике на Android/iOS */
+            -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
         }
 
         body {
             margin: 0;
             padding: 0;
-            /* Шрифт как на iPhone */
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             background-attachment: fixed;
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 95px; /* Отступ под меню */
+            padding-bottom: 95px;
         }
 
         h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.5px; }
         p { margin: 0; color: var(--secondary-text); }
 
-        /* --- СЛАЙДЕР (БАННЕРЫ) --- */
+        /* --- СЛАЙДЕР --- */
         .slider-container {
             width: 100%;
-            height: 160px;
+            height: 180px; /* Чуть выше, чтобы влезла кнопка */
             overflow: hidden;
             border-radius: 24px;
             margin-bottom: 25px;
             position: relative;
+            /* Исправление бага с серыми тенями */
             box-shadow: var(--shadow);
-            transform: translateZ(0); /* Включаем GPU */
+            background-clip: padding-box;
+            transform: translateZ(0); 
         }
 
         .slider-wrapper {
@@ -60,10 +61,10 @@
             height: 100%;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
             scroll-behavior: smooth;
         }
-        .slider-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .slider-wrapper::-webkit-scrollbar { display: none; }
 
         .slide {
             flex: 0 0 100%;
@@ -74,21 +75,26 @@
             padding: 25px;
             position: relative;
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
+            /* Убрал блюр из самого элемента, если фон достаточно непрозрачный - это лечит баги */
+            backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
         }
 
         .slide h3 { font-size: 20px; margin-bottom: 8px; color: #000; }
-        .slide p { font-size: 14px; line-height: 1.4; color: #444; }
-        
-        .slide-icon {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            font-size: 50px;
-            opacity: 0.1;
-            color: #000;
+        .slide p { font-size: 14px; line-height: 1.4; color: #444; margin-bottom: 15px; }
+
+        /* Кнопка в слайдере */
+        .slider-btn {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            align-self: flex-start; /* Прижать влево */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         /* --- СТРАНИЦЫ --- */
@@ -98,7 +104,6 @@
             opacity: 0;
             transform: scale(0.98);
             transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: opacity, transform;
         }
         .page.active {
             display: block;
@@ -123,9 +128,10 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            transition: transform 0.1s;
+            /* Исправление бага */
+            background-clip: padding-box;
         }
-        .product-card:active { transform: scale(0.96); }
+        .product-card:active { transform: scale(0.98); transition: 0.1s; }
 
         .product-image {
             width: 100%;
@@ -133,8 +139,8 @@
             border-radius: 16px;
             margin-bottom: 12px;
             overflow: hidden;
-            position: relative;
             background: #f0f0f0;
+            position: relative;
         }
         
         .img-placeholder {
@@ -143,7 +149,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #a0a0a0 !important; /* Фикс фиолетового цвета на iOS */
+            color: #a0a0a0;
             font-size: 28px;
         }
 
@@ -176,7 +182,7 @@
             transition: background 0.2s;
         }
 
-        /* --- КОРЗИНА (ОПТИМИЗИРОВАННАЯ) --- */
+        /* --- КОРЗИНА --- */
         .cart-item {
             background: var(--glass-bg);
             border-radius: 18px;
@@ -186,8 +192,8 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow); /* Легкая тень */
             
-            /* Свойства для анимации */
             opacity: 1;
             max-height: 100px;
             transform: translateX(0);
@@ -195,7 +201,6 @@
             overflow: hidden;
         }
 
-        /* Класс для анимации удаления */
         .cart-item.removing {
             opacity: 0;
             max-height: 0;
@@ -206,6 +211,7 @@
             transform: translateX(-20px);
         }
 
+        /* БЛОК ИТОГО (с анимацией) */
         .total-block {
             margin-top: 25px;
             padding: 24px;
@@ -213,7 +219,24 @@
             border-radius: 24px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             text-align: center;
+            
+            /* Свойства для анимации появления/исчезновения */
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 200px; /* Достаточно большая высота */
+            transition: all 0.4s ease;
+            overflow: hidden;
         }
+
+        /* Класс скрытия блока итого */
+        .total-block.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            max-height: 0;
+            margin-top: 0;
+            padding: 0;
+        }
+
         .checkout-btn {
             background: #000;
             color: white;
@@ -226,7 +249,6 @@
             border: none;
             cursor: pointer;
         }
-        .checkout-btn:active { opacity: 0.8; }
 
         /* --- НИЖНЕЕ МЕНЮ --- */
         .bottom-nav {
@@ -236,7 +258,7 @@
             transform: translateX(-50%);
             width: 92%;
             max-width: 400px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95); /* Меньше прозрачности */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.5);
@@ -262,7 +284,6 @@
             width: 60px;
         }
         
-        /* Исправление фиолетовых иконок */
         .nav-item i {
             font-size: 22px;
             margin-bottom: 4px;
@@ -278,7 +299,7 @@
             position: absolute;
             top: -2px;
             right: 12px;
-            background: #ff3b30; /* Цвет уведомлений iOS */
+            background: #ff3b30;
             color: #fff;
             border-radius: 50%;
             min-width: 18px;
@@ -291,7 +312,7 @@
             justify-content: center;
             opacity: 0;
             transform: scale(0);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s;
             border: 2px solid white;
         }
         .cart-badge.visible { opacity: 1; transform: scale(1); }
@@ -305,6 +326,7 @@
             text-align: center;
             border: 1px solid var(--glass-border);
             margin-bottom: 20px;
+            box-shadow: var(--shadow);
         }
         .avatar {
             width: 80px;
@@ -317,7 +339,6 @@
             justify-content: center;
             color: white;
             font-size: 32px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
         /* --- МОДАЛКА --- */
@@ -325,8 +346,7 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
@@ -335,11 +355,10 @@
             align-items: center;
             justify-content: center;
         }
-        
         .modal-overlay.open { opacity: 1; visibility: visible; }
 
         .modal {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.98);
             width: 85%;
             padding: 35px 25px;
             border-radius: 30px;
@@ -349,7 +368,6 @@
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
-
         .modal-overlay.open .modal { transform: scale(1) translateY(0); opacity: 1; }
 
         .modal-btn {
@@ -383,17 +401,17 @@
                 <div class="slide">
                     <h3>Сезонные скидки</h3>
                     <p>Скидки до 30% на новую коллекцию Adidas.</p>
-                    <i class="fas fa-tag slide-icon"></i>
                 </div>
                 <div class="slide">
-                    <h3>Конкурс на 50 000₽</h3>
-                    <p>Участвуй в розыгрыше призов в нашей группе ВК!</p>
-                    <i class="fab fa-vk slide-icon"></i>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <h3>Конкурс на 50 000₽</h3>
+                        <p>Участвуй в розыгрыше призов в нашей группе ВК!</p>
+                        <a href="https://vk.com/wall-233057761_3" target="_blank" class="slider-btn">Участвовать</a>
+                    </div>
                 </div>
                 <div class="slide">
                     <h3>Быстрая отправка</h3>
                     <p>Отправляем заказы в течение 3 дней после оформления.</p>
-                    <i class="fas fa-shipping-fast slide-icon"></i>
                 </div>
             </div>
         </div>
@@ -411,7 +429,7 @@
             </div>
         </div>
         
-        <div id="cart-total-block" class="total-block" style="display: none;">
+        <div id="cart-total-block" class="total-block hidden">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 18px;">
                 <span>Итого:</span>
                 <span id="total-price" style="font-weight: 700;">0 ₽</span>
@@ -426,7 +444,7 @@
             <h3 id="user-name" style="margin-bottom: 5px;">Guest User</h3>
             <p style="font-size: 13px;">Добро пожаловать</p>
         </div>
-        <div style="background: var(--glass-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--glass-border);">
+        <div style="background: var(--glass-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: var(--shadow);">
             <h3 style="margin-bottom: 10px;">История заказов</h3>
             <p style="font-size: 14px; opacity: 0.6;">У вас пока нет активных заказов.</p>
         </div>
@@ -462,7 +480,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand(); 
         
-        // Настройка цветов темы Telegram
         tg.setHeaderColor('secondary_bg_color'); 
         tg.setBackgroundColor('secondary_bg_color');
 
@@ -496,7 +513,6 @@
 
         function addToCart(id, btnElement) {
             const product = products.find(p => p.id === id);
-            // Создаем копию объекта с уникальным ID для корзины, чтобы можно было удалять одинаковые товары по отдельности
             const cartItem = { ...product, cartId: Date.now() + Math.random() };
             cart.push(cartItem);
             
@@ -512,6 +528,9 @@
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
+        // Флаг анимации удаления
+        window.isRemoving = false;
+
         function updateCartUI() {
             const badge = document.getElementById('cart-badge');
             badge.innerText = cart.length;
@@ -522,24 +541,24 @@
             const totalBlock = document.getElementById('cart-total-block');
             const totalPriceEl = document.getElementById('total-price');
 
-            // Если корзина пуста и мы не в процессе удаления последнего элемента
+            // --- ОБРАБОТКА ПОЯВЛЕНИЯ/ИСЧЕЗНОВЕНИЯ БЛОКА "ИТОГО" ---
             if (cart.length === 0) {
-                cartItemsContainer.innerHTML = `
-                    <div style="text-align: center; margin-top: 60px; color: #8e8e93;">
-                        <i class="fas fa-shopping-basket" style="font-size: 40px; margin-bottom: 15px; opacity: 0.3;"></i>
-                        <p>Ваша корзина пуста</p>
-                    </div>`;
-                totalBlock.style.display = 'none';
+                // Если корзина пуста, скрываем блок "Итого" плавно (добавляем класс hidden)
+                totalBlock.classList.add('hidden');
+                
+                // Рисуем "пустую корзину" только если не идет анимация удаления элемента
+                if (!window.isRemoving) {
+                    cartItemsContainer.innerHTML = `
+                        <div style="text-align: center; margin-top: 60px; color: #8e8e93;">
+                            <i class="fas fa-shopping-basket" style="font-size: 40px; margin-bottom: 15px; opacity: 0.3;"></i>
+                            <p>Ваша корзина пуста</p>
+                        </div>`;
+                }
             } else {
-                totalBlock.style.display = 'block';
+                // Если есть товары, показываем блок "Итого" (убираем hidden)
+                totalBlock.classList.remove('hidden');
+                
                 let total = 0;
-                
-                // Перерисовываем корзину ТОЛЬКО если количество элементов изменилось (при добавлении),
-                // но при удалении мы управляем DOM вручную, чтобы сохранить анимацию.
-                // Для простоты здесь полная перерисовка, но с хитростью для удаления.
-                
-                // Чтобы не сбивать анимацию удаления, проверим, не происходит ли удаление сейчас.
-                // В простой реализации мы просто перерендерим всё.
                 
                 const currentHTML = cart.map((item, index) => {
                     total += item.price;
@@ -556,39 +575,32 @@
                     `;
                 }).join('');
                 
-                // Если мы просто обновляем цифры (не удаляем), можно обновить HTML
-                // Но проще: если длина массива совпадает с кол-вом элементов в DOM, не трогаем HTML (кроме цифр).
-                // Для надежности обновляем HTML всегда, кроме момента анимации удаления.
-                
                 if (!window.isRemoving) {
                     cartItemsContainer.innerHTML = currentHTML;
                 }
-                
                 totalPriceEl.innerText = total + ' ₽';
             }
         }
-
-        // Флаг, чтобы updateCartUI не перерисовал список пока идет анимация
-        window.isRemoving = false;
 
         function removeFromCart(cartId) {
             window.isRemoving = true;
             const itemElement = document.getElementById(`cart-item-${cartId}`);
             
             if (itemElement) {
-                // Запускаем CSS анимацию
+                // 1. Анимация удаления самого товара
                 itemElement.classList.add('removing');
                 
-                // Ждем окончания анимации (400ms как в CSS)
                 setTimeout(() => {
-                    // Находим индекс элемента в массиве
                     const index = cart.findIndex(item => item.cartId == cartId);
                     if (index > -1) {
                         cart.splice(index, 1);
                     }
-                    window.isRemoving = false; // Снимаем флаг
-                    updateCartUI(); // Теперь безопасно обновляем интерфейс
-                }, 400);
+                    window.isRemoving = false;
+                    
+                    // 2. Обновляем интерфейс (тут сработает анимация скрытия "Итого", если товаров станет 0)
+                    updateCartUI(); 
+                    
+                }, 400); // 400ms - время анимации
             }
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
@@ -629,20 +641,16 @@
         const slider = document.getElementById('slider');
         let slideIndex = 0;
         const slideCount = 3;
-        const slideWidth = slider.clientWidth;
 
-        // Автоматическая прокрутка
         setInterval(() => {
             slideIndex++;
             if (slideIndex >= slideCount) {
                 slideIndex = 0;
                 slider.scrollTo({ left: 0, behavior: 'smooth' });
             } else {
-                // Скроллим на ширину одного слайда * индекс
-                // (Примитивный скролл, для exact fit лучше использовать offsetLeft)
                 slider.scrollTo({ left: slider.offsetWidth * slideIndex, behavior: 'smooth' });
             }
-        }, 5000); // Каждые 5 секунд
+        }, 5000); 
 
         renderProducts();
 
