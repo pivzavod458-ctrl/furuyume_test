@@ -16,9 +16,8 @@
             --bg-color: #f2f4f6;
             --text-color: #1a1a1a;
             --secondary-text: #8e8e93;
-            --glass-bg: rgba(255, 255, 255, 0.85); /* Чуть менее прозрачно, чтобы убрать баги */
+            --glass-bg: rgba(255, 255, 255, 0.85);
             --glass-border: rgba(255, 255, 255, 0.6);
-            /* Упрощенная тень, чтобы не баговала на iOS */
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
@@ -44,12 +43,11 @@
         /* --- СЛАЙДЕР --- */
         .slider-container {
             width: 100%;
-            height: 180px; /* Чуть выше, чтобы влезла кнопка */
+            height: 180px;
             overflow: hidden;
             border-radius: 24px;
             margin-bottom: 25px;
             position: relative;
-            /* Исправление бага с серыми тенями */
             box-shadow: var(--shadow);
             background-clip: padding-box;
             transform: translateZ(0); 
@@ -75,7 +73,6 @@
             padding: 25px;
             position: relative;
             background: var(--glass-bg);
-            /* Убрал блюр из самого элемента, если фон достаточно непрозрачный - это лечит баги */
             backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px);
         }
@@ -83,7 +80,6 @@
         .slide h3 { font-size: 20px; margin-bottom: 8px; color: #000; }
         .slide p { font-size: 14px; line-height: 1.4; color: #444; margin-bottom: 15px; }
 
-        /* Кнопка в слайдере */
         .slider-btn {
             display: inline-block;
             background: #000;
@@ -93,7 +89,7 @@
             text-decoration: none;
             font-size: 13px;
             font-weight: 600;
-            align-self: flex-start; /* Прижать влево */
+            align-self: flex-start;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
@@ -128,7 +124,6 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            /* Исправление бага */
             background-clip: padding-box;
         }
         .product-card:active { transform: scale(0.98); transition: 0.1s; }
@@ -139,18 +134,16 @@
             border-radius: 16px;
             margin-bottom: 12px;
             overflow: hidden;
-            background: #f0f0f0;
+            background: #f0f0f0; /* Цвет фона пока грузится картинка */
             position: relative;
         }
         
-        .img-placeholder {
+        /* Стили для картинки внутри карточки */
+        .product-image img {
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #a0a0a0;
-            font-size: 28px;
+            object-fit: cover; /* Чтобы картинка заполняла квадрат красиво */
+            display: block;
         }
 
         .product-title {
@@ -192,13 +185,22 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow); /* Легкая тень */
+            box-shadow: var(--shadow);
             
             opacity: 1;
             max-height: 100px;
             transform: translateX(0);
             transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             overflow: hidden;
+        }
+
+        /* Мини-фото в корзине */
+        .cart-item-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-right: 12px;
         }
 
         .cart-item.removing {
@@ -211,7 +213,6 @@
             transform: translateX(-20px);
         }
 
-        /* БЛОК ИТОГО (с анимацией) */
         .total-block {
             margin-top: 25px;
             padding: 24px;
@@ -219,16 +220,13 @@
             border-radius: 24px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             text-align: center;
-            
-            /* Свойства для анимации появления/исчезновения */
             opacity: 1;
             transform: translateY(0);
-            max-height: 200px; /* Достаточно большая высота */
+            max-height: 200px;
             transition: all 0.4s ease;
             overflow: hidden;
         }
 
-        /* Класс скрытия блока итого */
         .total-block.hidden {
             opacity: 0;
             transform: translateY(20px);
@@ -258,7 +256,7 @@
             transform: translateX(-50%);
             width: 92%;
             max-width: 400px;
-            background: rgba(255, 255, 255, 0.95); /* Меньше прозрачности */
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.5);
@@ -395,7 +393,6 @@
 <body>
 
     <div id="home" class="page active">
-        
         <div class="slider-container">
             <div class="slider-wrapper" id="slider">
                 <div class="slide">
@@ -488,11 +485,12 @@
             document.getElementById('user-name').innerText = user.first_name + ' ' + (user.last_name || '');
         }
 
+        // ТЕПЕРЬ С КАРТИНКАМИ
         const products = [
-            { id: 1, name: "Adidas Japan track jacket", price: 7600 },
-            { id: 2, name: "Adidas x Yohji Yamamoto", price: 7200 },
-            { id: 3, name: "Adidas Chinese jacket", price: 5700 },
-            { id: 4, name: "VETEMENTS maroon bomber", price: 13200 }
+            { id: 1, name: "Adidas Japan track jacket", price: 7600, image: "japan.jpg" },
+            { id: 2, name: "Adidas x Yohji Yamamoto", price: 7200, image: "yamamoto.jpg" },
+            { id: 3, name: "Adidas Chinese jacket", price: 5700, image: "china.jpg" },
+            { id: 4, name: "VETEMENTS maroon bomber", price: 13200, image: "vetements.jpg" }
         ];
 
         let cart = [];
@@ -502,7 +500,7 @@
             container.innerHTML = products.map(p => `
                 <div class="product-card">
                     <div class="product-image">
-                        <div class="img-placeholder"><i class="fas fa-tshirt"></i></div>
+                        <img src="${p.image}" alt="${p.name}">
                     </div>
                     <div class="product-title">${p.name}</div>
                     <div class="product-price">${p.price} ₽</div>
@@ -528,7 +526,6 @@
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        // Флаг анимации удаления
         window.isRemoving = false;
 
         function updateCartUI() {
@@ -541,12 +538,8 @@
             const totalBlock = document.getElementById('cart-total-block');
             const totalPriceEl = document.getElementById('total-price');
 
-            // --- ОБРАБОТКА ПОЯВЛЕНИЯ/ИСЧЕЗНОВЕНИЯ БЛОКА "ИТОГО" ---
             if (cart.length === 0) {
-                // Если корзина пуста, скрываем блок "Итого" плавно (добавляем класс hidden)
                 totalBlock.classList.add('hidden');
-                
-                // Рисуем "пустую корзину" только если не идет анимация удаления элемента
                 if (!window.isRemoving) {
                     cartItemsContainer.innerHTML = `
                         <div style="text-align: center; margin-top: 60px; color: #8e8e93;">
@@ -555,18 +548,19 @@
                         </div>`;
                 }
             } else {
-                // Если есть товары, показываем блок "Итого" (убираем hidden)
                 totalBlock.classList.remove('hidden');
-                
                 let total = 0;
                 
                 const currentHTML = cart.map((item, index) => {
                     total += item.price;
                     return `
                         <div class="cart-item" id="cart-item-${item.cartId}">
-                            <div>
-                                <div style="font-weight:600; font-size: 14px; margin-bottom: 4px;">${item.name}</div>
-                                <div style="font-size: 13px; color: #666;">${item.price} ₽</div>
+                            <div style="display:flex; align-items:center;">
+                                <img src="${item.image}" class="cart-item-img">
+                                <div>
+                                    <div style="font-weight:600; font-size: 13px; margin-bottom: 4px;">${item.name}</div>
+                                    <div style="font-size: 12px; color: #666;">${item.price} ₽</div>
+                                </div>
                             </div>
                             <div onclick="removeFromCart('${item.cartId}')" style="padding: 10px; cursor: pointer;">
                                 <i class="fas fa-times" style="color: #ccc;"></i>
@@ -585,22 +579,14 @@
         function removeFromCart(cartId) {
             window.isRemoving = true;
             const itemElement = document.getElementById(`cart-item-${cartId}`);
-            
             if (itemElement) {
-                // 1. Анимация удаления самого товара
                 itemElement.classList.add('removing');
-                
                 setTimeout(() => {
                     const index = cart.findIndex(item => item.cartId == cartId);
-                    if (index > -1) {
-                        cart.splice(index, 1);
-                    }
+                    if (index > -1) cart.splice(index, 1);
                     window.isRemoving = false;
-                    
-                    // 2. Обновляем интерфейс (тут сработает анимация скрытия "Итого", если товаров станет 0)
                     updateCartUI(); 
-                    
-                }, 400); // 400ms - время анимации
+                }, 400);
             }
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
@@ -608,17 +594,14 @@
         function switchTab(tabId, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             element.classList.add('active');
-
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
         function openCheckoutModal() {
             const modalOverlay = document.getElementById('checkout-modal');
             const orderLinkBtn = document.getElementById('order-link');
-            
             const total = cart.reduce((sum, item) => sum + item.price, 0);
 
             let message = "Здравствуйте! Хочу оформить заказ:\n\n";
@@ -629,7 +612,6 @@
 
             orderLinkBtn.href = `https://t.me/furuyumeorders?text=${encodeURIComponent(message)}`;
             modalOverlay.classList.add('open');
-            
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
@@ -637,7 +619,6 @@
             document.getElementById('checkout-modal').classList.remove('open');
         }
 
-        // --- ЛОГИКА СЛАЙДЕРА ---
         const slider = document.getElementById('slider');
         let slideIndex = 0;
         const slideCount = 3;
@@ -653,7 +634,6 @@
         }, 5000); 
 
         renderProducts();
-
     </script>
 </body>
 </html>
